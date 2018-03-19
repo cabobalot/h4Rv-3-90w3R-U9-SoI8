@@ -10,6 +10,7 @@ import org.usfirst.frc.team4585.model.*;
 import GridNav.Vertex;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -48,6 +49,7 @@ public class GhostController implements HuskyClass {
 	
 	private SendableChooser<String> firstAutoChooser = new SendableChooser<>();
 	private SendableChooser<String> secondAutoChooser = new SendableChooser<>();
+	private SendableChooser<Boolean> twoCubeChooser = new SendableChooser<>();
 	private HuskyPID anglePID = new HuskyPID(1/90, 0, 0, 0);
 	private VisionCom visCom = new VisionCom();
 	private Timer timer = new Timer();
@@ -85,6 +87,10 @@ public class GhostController implements HuskyClass {
 		secondAutoChooser.addObject("Scale outside", "sc_out");
 		secondAutoChooser.addObject("Auto run", "auto_run");
 		SmartDashboard.putData("Second auto destination", secondAutoChooser);
+		
+		twoCubeChooser.addDefault("No", false);
+		twoCubeChooser.addDefault("Yes", true);
+		SmartDashboard.putData("Do a two cube auto", twoCubeChooser);
 		
 	}
 	
@@ -161,78 +167,17 @@ public class GhostController implements HuskyClass {
 		String gameInfo = DriverStation.getInstance().getGameSpecificMessage();
 		taskList.clear();
 		
-		double x = tracker.getInfo()[0];
 		
-		switch (firstAutoChooser.getSelected()) {
-		case "sw_in":
-			if (gameInfo.charAt(0) == 'L') {
-				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {8, 8}));
-				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
-				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
-				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
-				taskList.add(new AutoTask(TaskType.dropCube, new double[] {0, 0}));
-				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {8, 7}));
-			} else {
-				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {17, 8}));
-				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
-				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
-				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
-				taskList.add(new AutoTask(TaskType.dropCube, new double[] {0, 0}));
-				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {17, 7}));
-			}
-			
-			
-			
-			break;
 		
-		case "sw_out":
-			if (gameInfo.charAt(0) == 'L') {
-				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {5, 13}));
-				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
-				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
-				taskList.add(new AutoTask(TaskType.pointAt, new double[] {90}));
-				taskList.add(new AutoTask(TaskType.dropCube, new double[] {90, 0}));
-				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {4, 13}));
-			} else {
-				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {21, 13}));
-				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
-				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
-				taskList.add(new AutoTask(TaskType.pointAt, new double[] {-90}));
-				taskList.add(new AutoTask(TaskType.dropCube, new double[] {-90, 0}));
-				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {22, 13}));
-			}
-			
-			break;
+		addToAuto(firstAutoChooser.getSelected(), gameInfo);
 		
-		case "sc_out":
-			if (gameInfo.charAt(1) == 'L') {
-				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {4, 26}));
-				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {85}));
-				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {15}));
-				taskList.add(new AutoTask(TaskType.pointAt, new double[] {90}));
-				taskList.add(new AutoTask(TaskType.dropCube, new double[] {90, 1}));
-			} else {
-				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {22, 26}));
-				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {85}));
-				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {15}));
-				taskList.add(new AutoTask(TaskType.pointAt, new double[] {-90}));
-				taskList.add(new AutoTask(TaskType.dropCube, new double[] {-90, 1}));
-			}
+		if (twoCubeChooser.getSelected()) {
 			
-			break;
-		
-		case "auto_run":
-			taskList.add(new AutoTask(TaskType.goTo, new double[] {x, 13}));
-			
-			break;
-			
-		default:
-			
-			break;
-		
+			addToAuto(secondAutoChooser.getSelected(), gameInfo);
 		}
 		
-//		/*
+		
+		/*		//debug
 		taskList.clear();
 		taskList.add(new AutoTask(TaskType.goTo, new double[] {13, 6}));
 		taskList.add(new AutoTask(TaskType.goTo, new double[] {13, 5}));
@@ -636,5 +581,74 @@ public class GhostController implements HuskyClass {
 		return output;
 	}
 	
+	private void addToAuto(String options, String gameInfo) {
+		double x = tracker.getInfo()[0];
+		switch (options) {
+		case "sw_in":
+			if (gameInfo.charAt(0) == 'L') {
+				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {8, 8}));
+				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
+				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
+				taskList.add(new AutoTask(TaskType.dropCube, new double[] {0, 0}));
+				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {8, 7}));
+			} else {
+				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {17, 8}));
+				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
+				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
+				taskList.add(new AutoTask(TaskType.dropCube, new double[] {0, 0}));
+				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {17, 7}));
+			}
+			
+			break;
+		
+		case "sw_out":
+			if (gameInfo.charAt(0) == 'L') {
+				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {5, 13}));
+				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
+				taskList.add(new AutoTask(TaskType.pointAt, new double[] {90}));
+				taskList.add(new AutoTask(TaskType.dropCube, new double[] {90, 0}));
+				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {4, 13}));
+			} else {
+				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {21, 13}));
+				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
+				taskList.add(new AutoTask(TaskType.pointAt, new double[] {-90}));
+				taskList.add(new AutoTask(TaskType.dropCube, new double[] {-90, 0}));
+				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {22, 13}));
+			}
+			
+			break;
+		
+		case "sc_out":
+			if (gameInfo.charAt(1) == 'L') {
+				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {4, 26}));
+				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {85}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {15}));
+				taskList.add(new AutoTask(TaskType.pointAt, new double[] {90}));
+				taskList.add(new AutoTask(TaskType.dropCube, new double[] {90, 1}));
+			} else {
+				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {22, 26}));
+				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {85}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {15}));
+				taskList.add(new AutoTask(TaskType.pointAt, new double[] {-90}));
+				taskList.add(new AutoTask(TaskType.dropCube, new double[] {-90, 1}));
+			}
+			
+			break;
+		
+		case "auto_run":
+			taskList.add(new AutoTask(TaskType.goTo, new double[] {x, 13}));
+			
+			break;
+			
+		default:
+			
+			break;
+		
+		}
+	}
 	
 }
