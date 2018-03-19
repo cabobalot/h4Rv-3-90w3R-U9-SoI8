@@ -26,4 +26,11 @@ public class HuskyMath {
 		return out;
 	}
 	
+	
+	public static double modAngDiff(double in, double targ) {
+		double angleDiff = (targ - in);
+		double modAngleDiff = ((angleDiff + 180) % 360) - 180;
+		return modAngleDiff;
+	}
+	
 }

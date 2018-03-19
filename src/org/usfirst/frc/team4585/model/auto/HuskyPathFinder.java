@@ -2,6 +2,7 @@ package org.usfirst.frc.team4585.model.auto;
 
 import java.io.File;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 
 import GridNav.GridNav;
 import GridNav.Vertex;
@@ -44,7 +45,7 @@ public class HuskyPathFinder extends GridNav{
 			throw new Exception("Route creation failed!");
 		}
 		
-//		bestroute = clearLinePoints(bestroute);
+		bestroute = clearLinePoints(bestroute);
 //		bestroute = clearClosePoints(bestroute);
 		
 		bestroute.remove();
@@ -100,7 +101,9 @@ public class HuskyPathFinder extends GridNav{
 		return Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2));
 	}
 	
-	public void printPath() {
+	public String[] printPath() {
+		ArrayList<String> out = new ArrayList<String>();
+		String line;
 		Vertex[][] vMap = getVertexMatrix();
 		for (int i = 0; i < vMap.length; i++) {
 			for (int j = 0; j < vMap[i].length; j++) {
@@ -111,12 +114,16 @@ public class HuskyPathFinder extends GridNav{
 		}
 		
 		for (int i = 0; i < vMap.length; i++) {
+			line = "";
 			for (int j = 0; j < vMap[i].length; j++) {
 				System.out.print(vMap[i][j].getKey());
+				line += vMap[i][j].getKey();
 			}
 			System.out.println();
+			out.add(line);
 		}
 		
+		return out.toArray(new String[out.size()]);
 		
 	}
 	
@@ -162,9 +169,9 @@ public class HuskyPathFinder extends GridNav{
 		String map = "TTTTTTTTTTTTTTTTTTTTTTTTTTT\r\n" + 
 				 	 "TT.......................TT\r\n" + 
 				 	 "T.........................T\r\n" + 
-				 	 "T.........TTTTTTT.........T\r\n" + 
 				 	 "T.........................T\r\n" + 
-				 	 "T.........TTTTTTT.........T\r\n" + 
+				 	 "T.........................T\r\n" + 
+				 	 "T.........................T\r\n" + 
 				 	 "T.........................T\r\n" + 
 				 	 "T.........................T\r\n" + 
 				 	 "T..........TTTTT..........T\r\n" + 

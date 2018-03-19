@@ -47,6 +47,7 @@ public class GhostController implements HuskyClass {
 	private HuskyJoy weaponsJoy;
 	
 	private SendableChooser<String> firstAutoChooser = new SendableChooser<>();
+	private SendableChooser<String> secondAutoChooser = new SendableChooser<>();
 	private HuskyPID anglePID = new HuskyPID(1/90, 0, 0, 0);
 	private VisionCom visCom = new VisionCom();
 	private Timer timer = new Timer();
@@ -77,7 +78,13 @@ public class GhostController implements HuskyClass {
 		firstAutoChooser.addObject("Switch outside (not center)", "sw_out");
 		firstAutoChooser.addObject("Scale outside", "sc_out");
 		firstAutoChooser.addObject("Auto run", "auto_run");
-		SmartDashboard.putData("Robot Auto Destenation", firstAutoChooser);
+		SmartDashboard.putData("First auto destination", firstAutoChooser);
+		
+		secondAutoChooser.addDefault("Switch inside", "sw_in");
+		secondAutoChooser.addObject("Switch outside (not center)", "sw_out");
+		secondAutoChooser.addObject("Scale outside", "sc_out");
+		secondAutoChooser.addObject("Auto run", "auto_run");
+		SmartDashboard.putData("Second auto destination", secondAutoChooser);
 		
 	}
 	
@@ -158,49 +165,56 @@ public class GhostController implements HuskyClass {
 		
 		switch (firstAutoChooser.getSelected()) {
 		case "sw_in":
-			taskList.add(new AutoTask(TaskType.goTo, new double[] {13, 3}));
-			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
-			taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
 			if (gameInfo.charAt(0) == 'L') {
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {8, 6}));
+				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {8, 8}));
+				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
+				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
+				taskList.add(new AutoTask(TaskType.dropCube, new double[] {0, 0}));
+				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {8, 7}));
 			} else {
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {17, 6}));
+				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {17, 8}));
+				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
+				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
+				taskList.add(new AutoTask(TaskType.dropCube, new double[] {0, 0}));
+				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {17, 7}));
 			}
-			taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
-			taskList.add(new AutoTask(TaskType.dropCube, new double[] {0, 0}));
+			
 			
 			
 			break;
 		
 		case "sw_out":
-			taskList.add(new AutoTask(TaskType.goTo, new double[] {x, 17}));
-			
-			
 			if (gameInfo.charAt(0) == 'L') {
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {4, 18}));
+				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {5, 13}));
 				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
 				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {5, 13}));
 				taskList.add(new AutoTask(TaskType.pointAt, new double[] {90}));
 				taskList.add(new AutoTask(TaskType.dropCube, new double[] {90, 0}));
+				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {4, 13}));
 			} else {
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {22, 18}));
+				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {21, 13}));
 				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
 				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {21, 13}));
 				taskList.add(new AutoTask(TaskType.pointAt, new double[] {-90}));
 				taskList.add(new AutoTask(TaskType.dropCube, new double[] {-90, 0}));
+				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {22, 13}));
 			}
 			
 			break;
 		
 		case "sc_out":
 			if (gameInfo.charAt(1) == 'L') {
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {4, 26}));
+				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {4, 26}));
+				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {85}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {15}));
 				taskList.add(new AutoTask(TaskType.pointAt, new double[] {90}));
 				taskList.add(new AutoTask(TaskType.dropCube, new double[] {90, 1}));
 			} else {
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {22, 26}));
+				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {22, 26}));
+				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {85}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {15}));
 				taskList.add(new AutoTask(TaskType.pointAt, new double[] {-90}));
 				taskList.add(new AutoTask(TaskType.dropCube, new double[] {-90, 1}));
 			}
@@ -218,10 +232,12 @@ public class GhostController implements HuskyClass {
 		
 		}
 		
-		/*
+//		/*
 		taskList.clear();
-		taskList.add(new AutoTask(TaskType.goToMaping, new double[] {13, 4}));
-		taskList.add(new AutoTask(TaskType.goToMaping, new double[] {15, 7}));
+		taskList.add(new AutoTask(TaskType.goTo, new double[] {13, 6}));
+		taskList.add(new AutoTask(TaskType.goTo, new double[] {13, 5}));
+		taskList.add(new AutoTask(TaskType.goTo, new double[] {12, 4}));
+		taskList.add(new AutoTask(TaskType.goTo, new double[] {13, 4}));
 //		*/
 		
 		
@@ -239,13 +255,11 @@ public class GhostController implements HuskyClass {
 
 	@Override
 	public void doAuto() {
-		
-//		driveToMaping(new double[] {17, 6});
-		
-		
+		/*
 		if (timer.get() > 13) {
 			claw.giveInfo(new double[] {0});
 		}
+//		*/
 		
 //		arm.giveInfo(new double[] {45});
 //		dropCube(new double[] {0, 0});
@@ -302,13 +316,19 @@ public class GhostController implements HuskyClass {
 			switch(taskList.get(counter).getType()){
 			
 			case goTo:
-				if(driveTo(taskList.get(counter).getInfo())) {
+				if(driveTo(taskList.get(counter).getInfo(), false)) {
 					counter++;
 				}
 				break;
 			
-			case goToMaping:
-				if(driveToMaping(taskList.get(counter).getInfo())) {
+			case goToMapping:
+				if(driveToMaping(taskList.get(counter).getInfo(), false)) {
+					counter++;
+				}
+				break;
+				
+			case goToReverse:
+				if(driveTo(taskList.get(counter).getInfo(), true)) {
 					counter++;
 				}
 				break;
@@ -372,7 +392,7 @@ public class GhostController implements HuskyClass {
 		
 	}
 	
-	private boolean driveTo(double[] I) {
+	private boolean driveTo(double[] I, boolean reverse) {
 		double[] buffer = {0, 0};
 		double targAngle;
 		posInfo = tracker.getInfo();
@@ -383,9 +403,17 @@ public class GhostController implements HuskyClass {
 		SmartDashboard.putNumber("targY", I[1]);
 		SmartDashboard.putNumber("TargAngle", targAngle);
 		
-		buffer[0] = ((Math.round(posInfo[0]) == Math.round(I[0])) && (Math.round(posInfo[1]) == Math.round(I[1]))/* || 
-				HuskyMath.gSmallAngDiff(posInfo[2], targAngle) > 90*/)? 0:0.6;
-		buffer[1] = angleAccel(posInfo[2], targAngle);
+		if (reverse) {
+			buffer[0] = ((Math.round(posInfo[0]) == Math.round(I[0])) && (Math.round(posInfo[1]) == Math.round(I[1])) || 
+					Math.abs(HuskyMath.modAngDiff(posInfo[2], targAngle + 180)) > 45)? 0:-0.6;
+			buffer[1] = angleAccel(posInfo[2], targAngle + 180);
+		}
+		else {
+			buffer[0] = ((Math.round(posInfo[0]) == Math.round(I[0])) && (Math.round(posInfo[1]) == Math.round(I[1])) || 
+					Math.abs(HuskyMath.modAngDiff(posInfo[2], targAngle)) > 45)? 0:0.6;
+			buffer[1] = angleAccel(posInfo[2], targAngle);
+		}
+		
 		
 		chassis.giveInfo(buffer);
 		
@@ -393,7 +421,7 @@ public class GhostController implements HuskyClass {
 		return (Math.round(posInfo[0]) == Math.round(I[0])) && (Math.round(posInfo[1]) == Math.round(I[1]));
 	}
 	
-	private boolean driveToMaping(double[] I) {
+	private boolean driveToMaping(double[] I, boolean reverse) {
 		posInfo = tracker.getInfo();
 		
 		if ((targPoint[0] != I[0]) || (targPoint[1] != I[1])) {
@@ -408,7 +436,7 @@ public class GhostController implements HuskyClass {
 			}
 			route = pathFinder.getPathList();
 			targPoint = I.clone();
-			pathFinder.printPath();
+			SmartDashboard.putStringArray("map path array", pathFinder.printPath());
 		}
 		
 		SmartDashboard.putNumber("mapUpdate", mapUpdate);
@@ -422,7 +450,7 @@ public class GhostController implements HuskyClass {
 			mapTargY = next.getY();
 		}
 		
-		if(driveTo(new double[] {mapTargX, mapTargY})) {
+		if(driveTo(new double[] {mapTargX, mapTargY}, reverse)) {
 			if ((mapTargX == I[0]) && (mapTargY == I[1])) {
 				route.pop();
 				return true;
