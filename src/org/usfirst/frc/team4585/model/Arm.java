@@ -21,6 +21,7 @@ public class Arm implements HuskyClass {
 	private double oldSpeed;
 	private double oldJoy;
 	private boolean fakeEstop = false;
+	private boolean antiFall = false;
 	
 	private Spark arm = new Spark(ARM_PORT);
 	private PowerDistributionPanel powReg = new PowerDistributionPanel();
@@ -40,6 +41,7 @@ public class Arm implements HuskyClass {
 		oldPOV = true;
 		oldSpeed = 0;
 		oldJoy = 0;
+		antiFall = false;
 	}
 
 	@Override
@@ -88,21 +90,22 @@ public class Arm implements HuskyClass {
 		
 		double PIDout = armPid.calculate(pot.get(), joyVal) / 90.0d;
 		
-		if (joy.getRawButton(11)) {
+		
+		if (joy.getRawButton(9) || antiFall) {
+			arm.set(1.0);	//anti fall
+		}
+		else if (joy.getRawButton(11)) {
 //			arm.set(HuskyMath.limitRange(joy.getDeadAxis(3, 0, 0.1, 0.1), -0.4, 0.1));
 			
 			if (joy.getPOV(0) == 0.0) {
-				arm.set(0.4);
+				arm.set(-0.4);
 			}
 			else if (joy.getPOV(0) == 180.0) {
-				arm.set(-0.1);
-			}
-			else if (joy.getPOV(0) == -1.0) {
 				arm.set(0.1);
 			}
-		}
-		else if (joy.getRawButton(9)) {
-			arm.set(-0.1);	//anti fall
+			else if (joy.getPOV(0) == -1.0) {
+				arm.set(-0.1);
+			}
 		}
 		else {
 			arm.set(HuskyMath.limitRange(PIDout, -0.4, 0.1));
@@ -163,6 +166,10 @@ public class Arm implements HuskyClass {
 		return out;
 	}
 
+	public void setAntiFall(boolean state) {
+		antiFall = state;
+	}
+	
 	@Override
 	public double[] getInfo() {
 		return new double[] {pot.get()};

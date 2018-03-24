@@ -60,7 +60,6 @@ public class Chassis extends DifferentialDrive implements HuskyClass {
 		SmartDashboard.putNumber("in: ",sonar.getInches());
 	}
 
-
 	@Override
 	public double[] getInfo() {
 		// TODO Auto-generated method stub

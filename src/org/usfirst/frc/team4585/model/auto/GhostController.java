@@ -115,7 +115,14 @@ public class GhostController implements HuskyClass {
 //		chassis.giveInfo(new double[] {-driveJoy.getSliderScaled(1), driveJoy.getSliderScaled(2)});
 		
 			//non slider drive
-		chassis.giveInfo(new double[] {-driveJoy.getDeadAxis(1, 0.1, 0.1), driveJoy.getDeadAxis(2, 0.15, 0.15)});
+		if(weaponsJoy.getRawButton(9) || driveJoy.getRawButton(9)) {
+			chassis.giveInfo(new double[] {-1.0, 0.0});
+			arm.setAntiFall(true);
+		}
+		else {
+			chassis.giveInfo(new double[] {-driveJoy.getDeadAxis(1, 0.1, 0.1), driveJoy.getDeadAxis(2, 0.15, 0.15)});
+			arm.setAntiFall(false);
+		}
 		
 		
 			//climb
