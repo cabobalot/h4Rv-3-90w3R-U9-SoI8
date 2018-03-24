@@ -72,7 +72,7 @@ public class PositionTracker implements HuskyClass {
 		stationChooser.addDefault("Left", 0);
 		stationChooser.addObject("Middle", 1);
 		stationChooser.addObject("Right", 2);
-		SmartDashboard.putData("Robot Driver Station", stationChooser);
+		SmartDashboard.putData("Robot Start Driver Station", stationChooser);
 	}
 	
 	@Override

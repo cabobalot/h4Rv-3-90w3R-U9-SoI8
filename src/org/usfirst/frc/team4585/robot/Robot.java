@@ -32,8 +32,8 @@ public class Robot extends IterativeRobot {
 	private Timer timer = new Timer();
 	
 	private HuskyJoy driveJoy = new HuskyJoy(DRIVE_PORT);
-	private HuskyJoy weaponsJoy = driveJoy;
-//	private HuskyJoy weaponsJoy = new HuskyJoy(WEAPONS_PORT);
+//	private HuskyJoy weaponsJoy = driveJoy;
+	private HuskyJoy weaponsJoy = new HuskyJoy(WEAPONS_PORT);
 	
 	private Chassis chassis = new Chassis(driveJoy, timer);
 	private Arm arm = new Arm(weaponsJoy);
@@ -41,7 +41,7 @@ public class Robot extends IterativeRobot {
 	private PositionTracker tracker = new PositionTracker(timer);
 
 	private Winch winch = new Winch(weaponsJoy);
-	private ArmActuator actuator = new ArmActuator(weaponsJoy);
+	private ArmExtender actuator = new ArmExtender(weaponsJoy);
 	
 	private Lifters lifters = new Lifters(driveJoy, timer);
 	

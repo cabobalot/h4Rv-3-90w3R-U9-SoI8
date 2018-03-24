@@ -21,8 +21,8 @@ public class Claw implements HuskyClass {
 	private Timer timer = new Timer();
 	
 	private double ampOffSet = 0;
-	private boolean targState = false; // open
-	private boolean oldState = true; // closed
+	private boolean open = true; // open
+	private boolean oldState = false; // closed
 	
 	public Claw(HuskyJoy J) {
 		joy = J;
@@ -32,7 +32,7 @@ public class Claw implements HuskyClass {
 	
 	@Override
 	public void teleopInit() {
-		targState = true;
+		open = true;
 
 	}
 
@@ -40,18 +40,18 @@ public class Claw implements HuskyClass {
 	public void doTeleop() {
 		
 		if (joy.getRawButton(5) == true && joy.getRawButton(3) == false) {
-			targState = false;
+			open = false;
 		}
 		else if (joy.getRawButton(5) == false && joy.getRawButton(3) == true) {
-			claw.set(0.3);
-			targState = true;
+			claw.set(0.4);
+			open = true;
 		}
 		else {
 			claw.set(0);
 		}
 		
-		if (!targState) {
-			claw.set(-0.6);
+		if (!open) {
+			claw.set(-0.3);
 		}
 		
 		/*
@@ -72,22 +72,22 @@ public class Claw implements HuskyClass {
 
 	@Override
 	public void autoInit() {
-		targState = false;
+		open = false;
 
 	}
 
 	@Override
 	public void doAuto() {
-		if (targState != oldState) {
+		if (open != oldState) {
 			timer.reset();
 			timer.start();
-			oldState = targState;
+			oldState = open;
 		}
-		if (targState) {
-			claw.set(0.5);
+		if (open) {
+			claw.set(0.3);
 		}
 		else {
-			claw.set(-0.5);
+			claw.set(-0.3);
 		}
 
 	}
@@ -116,7 +116,7 @@ public class Claw implements HuskyClass {
 
 	@Override
 	public void giveInfo(double[] info) {
-		targState = (info[0] != 1);
+		open = (info[0] != 1);
 		
 	}
 

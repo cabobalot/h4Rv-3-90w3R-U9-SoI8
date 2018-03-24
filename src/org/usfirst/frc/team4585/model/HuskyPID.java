@@ -6,17 +6,20 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class HuskyPID {
 	private double kp, ki, kd;
 	private double maxOut;
+	private double slewMax;
 	private double oldTime;
 	private double oldError;
 	private double olderError;
+	private double oldOut;
 	
 	private Timer timer = new Timer();
 	
-	public HuskyPID(double KP, double KI, double KD, double MaxOut) {
+	public HuskyPID(double KP, double KI, double KD, double MaxOut, double SlewMax) {
 		kp = KP;
 		ki = KI;
 		kd = KD;
 		maxOut = MaxOut;
+		slewMax = SlewMax;
 		
 		timer.start();
 	}
@@ -41,6 +44,9 @@ public class HuskyPID {
 		olderError = oldError;
 		oldError = error;
 		
+		buffer = slewLimit(buffer);
+		
+		
 		if (buffer > maxOut) {
 			buffer = maxOut;
 		}
@@ -50,8 +56,20 @@ public class HuskyPID {
 		
 		SmartDashboard.putNumber("PID out", buffer);
 		
+		oldOut = buffer;
 		return buffer;
 	}
 	
+	private double slewLimit(double in) {
+		double out = in;
+		
+		if (Math.abs(in - oldOut) > slewMax) {
+			out = oldOut + Math.copySign(slewMax, in);
+			
+		}
+		
+//		SmartDashboard.putNumber("Slew thing out", out);
+		return out;
+	}
 	
 }

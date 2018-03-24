@@ -24,5 +24,24 @@ public class HuskyJoy extends Joystick {
 		
 	}
 	
+	public double getDeadAxis(int axis, double deadMin, double deadMax){
+		double out = getRawAxis(axis);
+		
+		if (out < deadMax && out > deadMin) {
+			out = 0;
+		}
+		
+		return out;
+	}
+	public double getDeadAxis(int axis, double deadMin, double deadMax, double center){
+		double out = getRawAxis(axis);
+		
+		if (out < deadMax && out > deadMin) {
+			out = center;
+		}
+		
+		return out;
+	}
+	
 	
 }

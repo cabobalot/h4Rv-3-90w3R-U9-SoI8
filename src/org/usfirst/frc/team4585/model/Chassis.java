@@ -8,9 +8,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Chassis extends DifferentialDrive implements HuskyClass {
 	
-	private static final int RIGHT_DRIVE_PORT = 8;
-	private static final int LEFT_DRIVE_PORT = 9;
+	private final static int RIGHT_DRIVE_PORT = 8;
+	private final static int LEFT_DRIVE_PORT = 9;
 	private final int SONAR_PORT = 0;
+	private final double TURN_GAIN = 0.7;
+	private final double DRIVE_GAIN = 1;
 	
 	private AnalogSonar sonar = new AnalogSonar(SONAR_PORT);
 	
@@ -37,7 +39,7 @@ public class Chassis extends DifferentialDrive implements HuskyClass {
 	
 	@Override
 	public void doTeleop() {
-		arcadeDrive(info[0], info[1]);
+		arcadeDrive(info[0] * DRIVE_GAIN, info[1] * TURN_GAIN);
 		
 		
 		SmartDashboard.putNumber("joystick axis two:", joy.getRawAxis(2));

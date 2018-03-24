@@ -8,14 +8,15 @@ import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
-public class ArmActuator implements HuskyClass {
+public class ArmExtender implements HuskyClass {
 	
 	private final double MAX_AMPS = 2;
-	private final double MAX_EXTEND = 13;
+	private final double MAX_BEYOND = 13;
+	private final double MAX_MAX = 17;
 	private final int POT_PORT = 1;
-	private final int ARMACT_PORT = 6;
+	private final int ARMEXT_PORT = 6;
 	
-	private final double ACT_SPEED = 0.10;
+	private final double ACT_SPEED = 0.1;
 	
 	private AnalogPotentiometer pot = new AnalogPotentiometer(POT_PORT, -20.0d * Math.PI * 1.5d, Constants.EXTEND_POT_OFFSET);
 	private PowerDistributionPanel powReg = new PowerDistributionPanel();
@@ -30,10 +31,10 @@ public class ArmActuator implements HuskyClass {
 	
 	
 	private Joystick joy;
-	private Spark actuator = new Spark(ARMACT_PORT);
+	private Spark extender = new Spark(ARMEXT_PORT);
 	
 	
-	public ArmActuator(Joystick J) {
+	public ArmExtender(Joystick J) {
 		
 		joy = J;
 	}
@@ -55,33 +56,56 @@ public class ArmActuator implements HuskyClass {
 			actuator.set(-0.2);
 		}
 		else */
+//		/*
 		if (joy.getRawButton(6) && !joy.getRawButton(4)) {
 			targPos += ACT_SPEED;
 			moving = true;
-			actuator.set(0.5);
+			if (climbing || joy.getRawButton(12)) {
+				extender.set(-0.4);
+			}
 		}
 		else if (!joy.getRawButton(6) && joy.getRawButton(4)) {
 			targPos -= ACT_SPEED;
 			moving = true;
-			actuator.set(-0.5);
+			if (climbing || joy.getRawButton(12)) {
+				extender.set(0.4);
+			}
 		}
 		else {
 			moving = false;
-			actuator.set(0);
+			
+			if (oldMoving && !moving) {
+				targPos = pot.get();
+			}
+//			actuator.set((pot.get() - distanceLimit(targPos) ) / 4);
+			if (climbing || joy.getRawButton(12)) {
+				extender.set(0);
+			}
+//			actuator.set(0);
+		}
+		if (!climbing && !joy.getRawButton(12)) {
+			extender.set(HuskyMath.limitRange((pot.get() - distanceLimit(targPos)) / 4, -0.35, 0.35));
+//			actuator.set(joy.getRawAxis(0));
 		}
 		
-		if (oldMoving && !moving) {
-			targPos = pot.get();
-		}
+		
+		
+//		if (oldMoving && !moving) {
+//			targPos = pot.get();
+//		}
+//		*/
 //		actuator.set((distanceLimit(targPos) - pot.get()) / 2);
 //		actuator.set(0);
+//		actuator.set(joy.getRawAxis(1));
 		
 		oldMoving = moving;
 		
 		SmartDashboard.putNumber("distance limit", distanceLimit(targPos));
+				
 		SmartDashboard.putNumber("Targ Extend", targPos);
 //		*/
 		SmartDashboard.putNumber("extend pot", pot.get());
+		SmartDashboard.putNumber("extend speed", extender.get());
 		/*
 		
 		if (joy.getRawButton(4) == true && joy.getRawButton(6) == false) {
@@ -106,14 +130,20 @@ public class ArmActuator implements HuskyClass {
 
 	@Override
 	public void doAuto() {
-		actuator.set((distanceLimit(targPos) - pot.get()) / 2);
+		extender.set((pot.get() - distanceLimit(targPos)) / 5);
 
 	}
 	
 	private double distanceLimit(double targDist) {
 		double limitDist = targDist;
-		if (targDist * Math.cos(Math.toRadians(armAngle)) >= MAX_EXTEND) {
-			limitDist = MAX_EXTEND / Math.cos(Math.toRadians(armAngle));
+		if (targDist * Math.cos(Math.toRadians(armAngle)) >= MAX_BEYOND) {
+			limitDist = MAX_BEYOND / Math.cos(Math.toRadians(armAngle));
+		}
+		if (limitDist > MAX_MAX) {
+			limitDist = MAX_MAX;
+		}
+		if (limitDist < 0.5) {
+			limitDist = 0.5;
 		}
 		
 		return limitDist;

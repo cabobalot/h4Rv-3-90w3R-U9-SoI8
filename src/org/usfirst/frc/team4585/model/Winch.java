@@ -35,6 +35,7 @@ public class Winch implements HuskyClass {
 	@Override
 	public void doTeleop() {
 		winch.set(speed);
+		SmartDashboard.putNumber("winch speed", winch.get());
 	}
 
 	@Override

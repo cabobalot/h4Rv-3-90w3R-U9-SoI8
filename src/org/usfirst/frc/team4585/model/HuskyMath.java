@@ -33,4 +33,21 @@ public class HuskyMath {
 		return modAngleDiff;
 	}
 	
+	public static double limitRange(double in, double min, double max) {
+		double out = in;
+		
+		if (out >= max) {
+			out = max;
+		}
+		if (out <= min) {
+			out = min;
+		}
+		
+		return out;
+	}
+	
+	public static double map(double x, double inMin, double inMax, double outMin, double outMax) {
+		return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+	}
+	
 }

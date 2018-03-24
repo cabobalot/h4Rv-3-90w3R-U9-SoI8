@@ -11,14 +11,20 @@ public class Arm implements HuskyClass {
 	
 	private final int ARM_PORT = 7;
 	private final int POT_PORT = 6;
+	private final double SLEW_MAX = 0.01;
+	private final double MIN_ANGLE = -20;
+	private final double MAX_ANGLE = 90;
 	
 	private double targAngle = 0;
 	private double angle;
 	private boolean oldPOV;
+	private double oldSpeed;
+	private double oldJoy;
+	private boolean fakeEstop = false;
 	
 	private Spark arm = new Spark(ARM_PORT);
 	private PowerDistributionPanel powReg = new PowerDistributionPanel();
-	private HuskyPID armPid = new HuskyPID(2.5, 0, 0, 50);
+	private HuskyPID armPid = new HuskyPID(2.5, 0, 0, 50, 1000);
 	
 	private HuskyJoy joy;
 	private AnalogPotentiometer pot = new AnalogPotentiometer(POT_PORT, 3600, Constants.ARM_POT_OFFSET);
@@ -32,7 +38,8 @@ public class Arm implements HuskyClass {
 	public void teleopInit() {
 		targAngle = pot.get();
 		oldPOV = true;
-		
+		oldSpeed = 0;
+		oldJoy = 0;
 	}
 
 	@Override
@@ -40,12 +47,13 @@ public class Arm implements HuskyClass {
 		
 		SmartDashboard.putNumber("targ angle", targAngle);
 		SmartDashboard.putNumber("arm pot", pot.get());
+		/*
 		if (joy.getPOV(0) == 0.0) {
-			if (pot.get() < 88) {
-				arm.set( - (((-joy.getRawAxis(3) + 1) / 4) + 0.2) * 0.7);
+			if (pot.get() < 94) {
+				arm.set(slewLimit( - (((-joy.getRawAxis(3) + 0) / 4) + 0.4) * 0.7, SLEW_MAX));
 			}
 			else {
-				arm.set(0);
+//				arm.set(0);
 			}
 			
 			//arm.set(.5);
@@ -53,7 +61,7 @@ public class Arm implements HuskyClass {
 			oldPOV = true;
 		}
 		else if (joy.getPOV(0) == 180.0) {
-			arm.set((((-joy.getRawAxis(3) + 1) / 4) + 0.2) * 0.4);
+			arm.set(slewLimit((((-joy.getRawAxis(3) + 1) / 4) + 0.2) * 0.2, SLEW_MAX));
 			//arm.set(-.5);
 			
 			oldPOV = true;
@@ -67,14 +75,55 @@ public class Arm implements HuskyClass {
 		else if (joy.getPOV(0) == -1.0) {
 			//arm.set(0);
 			//arm.set(-(targAngle - pot.get()) / 90);
+//			arm.set(slewLimit(armPid.calculate(pot.get(), targAngle) / 90.0d, 0.05));
 			arm.set(armPid.calculate(pot.get(), targAngle) / 90.0d);
 		}
+//		*/
+		
+//		arm.set(slewLimit(armPid.calculate(pot.get(), targAngle) / 90.0d, 0.05));
+		
+//		arm.set(armPid.calculate(pot.get(), HuskyMath.map(joy.getRawAxis(1), -1, 1, -10, 94)) / 90.0d);
+		
+		double joyVal = HuskyMath.limitRange(slewLimit(HuskyMath.map(joy.getRawAxis(3), 1, -1, -10, 94), oldJoy, 0.4), MIN_ANGLE, MAX_ANGLE);
+		
+		double PIDout = armPid.calculate(pot.get(), joyVal) / 90.0d;
+		
+		if (joy.getRawButton(11)) {
+//			arm.set(HuskyMath.limitRange(joy.getDeadAxis(3, 0, 0.1, 0.1), -0.4, 0.1));
+			
+			if (joy.getPOV(0) == 0.0) {
+				arm.set(0.4);
+			}
+			else if (joy.getPOV(0) == 180.0) {
+				arm.set(-0.1);
+			}
+			else if (joy.getPOV(0) == -1.0) {
+				arm.set(0.1);
+			}
+		}
+		else if (joy.getRawButton(9)) {
+			arm.set(-0.1);	//anti fall
+		}
+		else {
+			arm.set(HuskyMath.limitRange(PIDout, -0.4, 0.1));
+		}
+		
+		
+		
+		oldJoy = joyVal;
+		oldSpeed = arm.get();
+		SmartDashboard.putNumber("arm pid out", PIDout);
+		SmartDashboard.putNumber("old arm Speed", oldSpeed);
+		SmartDashboard.putNumber("changed joy val", joyVal);
+		
 //		SmartDashboard.putNumber("arm amps", powReg.getCurrent(13));
 	}
 
 	@Override
 	public void autoInit() {
 		targAngle = pot.get();
+		oldSpeed = 0;
+		fakeEstop = false;
 
 	}
 
@@ -85,8 +134,33 @@ public class Arm implements HuskyClass {
 		double currentAngle = pot.get();
 		//double output = -(targAngle - currentAngle) / 90;
 		
-		arm.set((armPid.calculate(currentAngle, targAngle) / 90.0d) * 1);
+		
+		if (!fakeEstop) {
+			arm.set(HuskyMath.limitRange(armPid.calculate(currentAngle, targAngle) / 90.0d, -0.4, 0.1));
+		}
+		else {
+			arm.set(0);
+		}
 
+	}
+	
+	private double slewLimit(double in, double old, double limit) {
+		double out = in;
+		if (Math.abs(in - old) > limit) {
+			out = old + Math.copySign(limit, in - old);
+			
+		}
+		SmartDashboard.putNumber("Slew thing out", out);
+		return out;
+	}
+	private double slewLimit(double in) {
+		double out = in;
+		if (Math.abs(in - oldSpeed) > SLEW_MAX) {
+			out = oldSpeed + Math.copySign(SLEW_MAX, oldSpeed - in);
+			
+		}
+		SmartDashboard.putNumber("Slew thing out", out);
+		return out;
 	}
 
 	@Override
