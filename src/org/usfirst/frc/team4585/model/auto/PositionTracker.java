@@ -342,6 +342,14 @@ public class PositionTracker implements HuskyClass {
 		return out;
 	}
 	
+	public void calibrateGyro() {
+		gyro.calibrate();
+		gyro.reset();
+	}
+	public double getRawHeading() {
+		return gyro.getAngle();
+	}
+	
 	@Override
 	public double[] getInfo() {
 		return new double[] {encoderXPos, encoderYPos, modAngle, frontSonar.getInches(), backSonar.getInches()};

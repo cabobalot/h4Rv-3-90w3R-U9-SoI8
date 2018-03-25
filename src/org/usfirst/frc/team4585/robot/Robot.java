@@ -69,7 +69,7 @@ public class Robot extends IterativeRobot {
 //			CameraServer.getInstance().startAutomaticCapture();
 		}
 		
-		
+		SmartDashboard.putBoolean("calibrate gyro", false);
 		tracker.dashInit();
 		marcus.dashInit();
 		
@@ -195,6 +195,11 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("sonar", tracker.getInfo()[3]);
 		SmartDashboard.putNumber("arm pot", arm.getInfo()[0]);
 		SmartDashboard.putNumber("extend pot", actuator.getInfo()[0]);
+		SmartDashboard.putNumber("Heading", tracker.getRawHeading());
+		
+		if (SmartDashboard.getBoolean("calibrate gyro", false)) {
+			tracker.calibrateGyro();
+		}
 		
 		
 		arduino.setPins();

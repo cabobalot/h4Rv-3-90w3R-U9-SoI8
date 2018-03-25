@@ -56,7 +56,8 @@ public class GhostController implements HuskyClass {
 	private VisionCom visCom = new VisionCom();
 	private Timer timer = new Timer();
 	private HuskyPathFinder pathFinder = new HuskyPathFinder("/h4Rv-3-P0w3R-U9/src/fieldMap.map");
-	private HuskyPID drivePID = new HuskyPID(1.0, 0.2, 3.0, 0.8, 0.08);
+	private HuskyPID drivePID = new HuskyPID(2.0, 0.03, 0.8, 0.8, 0.03);
+//	private HuskyPID drivePID;
 //	/h4Rv-3-P0w3R-U9/src/fieldMap.map
 //	./src/fieldMap.map
 	
@@ -166,7 +167,9 @@ public class GhostController implements HuskyClass {
 		/*
 		teleTargPos[0] += (joy.getSliderScaled(0) / 10);
 		teleTargPos[1] += (-joy.getSliderScaled(1) / 10);
-		driveTo(teleTargPos);
+		if(driveTo(teleTargPos)) {
+			pointAt(0);
+		}
 //		*/
 		
 		
@@ -178,6 +181,8 @@ public class GhostController implements HuskyClass {
 		String gameInfo = DriverStation.getInstance().getGameSpecificMessage();
 		taskList.clear();
 		
+		double x = tracker.getInfo()[0];
+		taskList.add(new AutoTask(TaskType.goTo, new double[] {x, 2}));
 		addToAuto(firstAutoChooser.getSelected(), gameInfo);
 		
 		if (twoCubeChooser.getSelected()) {
@@ -185,9 +190,9 @@ public class GhostController implements HuskyClass {
 			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {-15}));
 			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {13, 4}));
 			taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
-			taskList.add(new AutoTask(TaskType.goTo, new double[] {13, 7}));
+			taskList.add(new AutoTask(TaskType.goTo, new double[] {13, 6}));
 			taskList.add(new AutoTask(TaskType.setClaw, new double[] {1}));
-			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {20}));
+			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
 			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {12, 4}));
 			
 			
@@ -195,9 +200,27 @@ public class GhostController implements HuskyClass {
 		}
 		
 		
-//		/*		//debug
+		/*		//debug
 		taskList.clear();
 		taskList.add(new AutoTask(TaskType.goTo, new double[] {13, 7}));
+		taskList.add(new AutoTask(TaskType.goToReverse, new double[] {13, 1}));
+		taskList.add(new AutoTask(TaskType.goTo, new double[] {8, 8}));
+		taskList.add(new AutoTask(TaskType.goToReverse, new double[] {13, 1}));
+		taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
+		
+		
+//		/*
+		double P = SmartDashboard.getNumber("P", 1.0);
+		double I = SmartDashboard.getNumber("I", 0.0);
+		double D = SmartDashboard.getNumber("D", 0.0);
+		double slew = SmartDashboard.getNumber("slew", 1);
+		drivePID = new HuskyPID(P, I, D, 0.8, slew);
+		
+		SmartDashboard.putNumber("P", P);
+		SmartDashboard.putNumber("I", I);
+		SmartDashboard.putNumber("D", D);
+		SmartDashboard.putNumber("slew", slew);
+		
 //		*/
 		
 		
@@ -371,14 +394,24 @@ public class GhostController implements HuskyClass {
 		SmartDashboard.putNumber("TargAngle", targAngle);
 		
 		if (I[0] != oldTargX || I[1] != oldTargY) {
-			drivePID.reset();
+//			drivePID.reset();
 			oldTargX = (int) Math.round(I[0]);
 			oldTargX = (int) Math.round(I[1]);
 		}
 		
 		if (reverse) {
-			buffer[0] = ((Math.round(posInfo[0]) == Math.round(I[0])) && (Math.round(posInfo[1]) == Math.round(I[1])) || 
-					Math.abs(HuskyMath.modAngDiff(posInfo[2], targAngle + 180)) > 45)? 0:-0.6;
+//			buffer[0] = ((Math.round(posInfo[0]) == Math.round(I[0])) && (Math.round(posInfo[1]) == Math.round(I[1])) || 
+//					Math.abs(HuskyMath.modAngDiff(posInfo[2], targAngle + 180)) > 45)? 0:-0.6;
+			
+			if ((Math.abs(HuskyMath.modAngDiff(posInfo[2], targAngle + 180)) < 45) &&
+					((Math.round(posInfo[0]) != Math.round(I[0])) || (Math.round(posInfo[1]) != Math.round(I[1])))) {
+				 buffer[0] = -drivePID.calculate(HuskyMath.distance(posInfo[0], posInfo[1], I[0], I[1]), 0.0);
+				 SmartDashboard.putNumber("drive PID out", buffer[0]);
+			}
+			else {
+				buffer[0] = 0.0;
+			}
+			
 			buffer[1] = angleAccel(posInfo[2], targAngle + 180);
 		}
 		else {
@@ -628,12 +661,14 @@ public class GhostController implements HuskyClass {
 			output = 0;
 		}
 		
-		if (output > 0.7) {
-			output = 0.7;
-		}
-		else if (output < -0.7) {
-			output = -0.7;
-		}
+//		if (output > 0.7) {
+//			output = 0.7;
+//		}
+//		else if (output < -0.7) {
+//			output = -0.7;
+//		}
+		
+		output = HuskyMath.limitRange(output, -0.6, 0.6);
 		
 		return output;
 	}
@@ -644,19 +679,19 @@ public class GhostController implements HuskyClass {
 		case "sw_in":
 			if (gameInfo.charAt(0) == 'L') {
 				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {8, 6}));
-				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {13}));
-				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {8, 10}));
-				taskList.add(new AutoTask(TaskType.dropCube, new double[] {0, 0}));
+				taskList.add(new AutoTask(TaskType.goTo, new double[] {8, 7}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
+//				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
+				taskList.add(new AutoTask(TaskType.goTo, new double[] {8, 9}));
+				taskList.add(new AutoTask(TaskType.setClaw, new double[] {0}));
 				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {8, 7}));
 			} else {
 				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {17, 6}));
-				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {13}));
-				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {17, 10}));
-				taskList.add(new AutoTask(TaskType.dropCube, new double[] {0, 0}));
+				taskList.add(new AutoTask(TaskType.goTo, new double[] {17, 7}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
+//				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
+				taskList.add(new AutoTask(TaskType.goTo, new double[] {17, 9}));
+				taskList.add(new AutoTask(TaskType.setClaw, new double[] {0}));
 				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {17, 7}));
 			}
 			
