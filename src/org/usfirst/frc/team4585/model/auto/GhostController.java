@@ -25,6 +25,8 @@ public class GhostController implements HuskyClass {
 	private int counter;
 	private int mapTargX;
 	private int mapTargY;
+	private int oldTargX;
+	private int oldTargY;
 	private int mapUpdate;
 	private ArrayDeque<Vertex> route;
 	
@@ -54,6 +56,7 @@ public class GhostController implements HuskyClass {
 	private VisionCom visCom = new VisionCom();
 	private Timer timer = new Timer();
 	private HuskyPathFinder pathFinder = new HuskyPathFinder("/h4Rv-3-P0w3R-U9/src/fieldMap.map");
+	private HuskyPID drivePID = new HuskyPID(1.0, 0.2, 3.0, 0.8, 0.08);
 //	/h4Rv-3-P0w3R-U9/src/fieldMap.map
 //	./src/fieldMap.map
 	
@@ -120,7 +123,7 @@ public class GhostController implements HuskyClass {
 			arm.setAntiFall(true);
 		}
 		else {
-			chassis.giveInfo(new double[] {-driveJoy.getDeadAxis(1, 0.1, 0.1), driveJoy.getDeadAxis(2, 0.15, 0.15)});
+			chassis.giveInfo(new double[] {-driveJoy.getDeadAxis(1, 0.1, 0.1), driveJoy.getRawAxis(2)});
 			arm.setAntiFall(false);
 		}
 		
@@ -179,13 +182,22 @@ public class GhostController implements HuskyClass {
 		
 		if (twoCubeChooser.getSelected()) {
 			
+			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {-15}));
+			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {13, 4}));
+			taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
+			taskList.add(new AutoTask(TaskType.goTo, new double[] {13, 7}));
+			taskList.add(new AutoTask(TaskType.setClaw, new double[] {1}));
+			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {20}));
+			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {12, 4}));
+			
+			
 			addToAuto(secondAutoChooser.getSelected(), gameInfo);
 		}
 		
 		
-		/*		//debug
+//		/*		//debug
 		taskList.clear();
-		taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
+		taskList.add(new AutoTask(TaskType.goTo, new double[] {13, 7}));
 //		*/
 		
 		
@@ -195,6 +207,8 @@ public class GhostController implements HuskyClass {
 		targPoint[0] = -1.0d;
 		targPoint[1] = -1.0d;
 		mapUpdate = 0;
+		oldTargX = 0;
+		oldTargY = 0;
 		SmartDashboard.putNumber("mapUpdate", mapUpdate);
 		timer.reset();
 		timer.start();
@@ -301,6 +315,11 @@ public class GhostController implements HuskyClass {
 				}
 				
 				break;
+				
+			case setClaw:
+				claw.giveInfo(taskList.get(counter).getInfo());
+				counter++;
+				break;
 			
 			case setArmDeg:
 				arm.giveInfo(taskList.get(counter).getInfo());
@@ -351,14 +370,34 @@ public class GhostController implements HuskyClass {
 		SmartDashboard.putNumber("targY", I[1]);
 		SmartDashboard.putNumber("TargAngle", targAngle);
 		
+		if (I[0] != oldTargX || I[1] != oldTargY) {
+			drivePID.reset();
+			oldTargX = (int) Math.round(I[0]);
+			oldTargX = (int) Math.round(I[1]);
+		}
+		
 		if (reverse) {
 			buffer[0] = ((Math.round(posInfo[0]) == Math.round(I[0])) && (Math.round(posInfo[1]) == Math.round(I[1])) || 
 					Math.abs(HuskyMath.modAngDiff(posInfo[2], targAngle + 180)) > 45)? 0:-0.6;
 			buffer[1] = angleAccel(posInfo[2], targAngle + 180);
 		}
 		else {
-			buffer[0] = ((Math.round(posInfo[0]) == Math.round(I[0])) && (Math.round(posInfo[1]) == Math.round(I[1])) || 
-					Math.abs(HuskyMath.modAngDiff(posInfo[2], targAngle)) > 45)? 0:0.6;
+//			buffer[0] = ((Math.round(posInfo[0]) == Math.round(I[0])) && (Math.round(posInfo[1]) == Math.round(I[1])) || 
+//					Math.abs(HuskyMath.modAngDiff(posInfo[2], targAngle)) > 45)? 0:0.6;
+			
+			
+			
+			if ((Math.abs(HuskyMath.modAngDiff(posInfo[2], targAngle)) < 45) &&
+					((Math.round(posInfo[0]) != Math.round(I[0])) || (Math.round(posInfo[1]) != Math.round(I[1])))) {
+				 buffer[0] = drivePID.calculate(HuskyMath.distance(posInfo[0], posInfo[1], I[0], I[1]), 0.0);
+				 SmartDashboard.putNumber("drive PID out", buffer[0]);
+			}
+			else {
+				buffer[0] = 0.0;
+			}
+			SmartDashboard.putNumber("Drive out", buffer[0]);
+			
+			
 			buffer[1] = angleAccel(posInfo[2], targAngle);
 		}
 		
@@ -604,19 +643,19 @@ public class GhostController implements HuskyClass {
 		switch (options) {
 		case "sw_in":
 			if (gameInfo.charAt(0) == 'L') {
-				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {8, 6}));
 				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
-				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
+				taskList.add(new AutoTask(TaskType.goTo, new double[] {8, 6}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {13}));
 				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
-				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {8, 10}));
+				taskList.add(new AutoTask(TaskType.goTo, new double[] {8, 10}));
 				taskList.add(new AutoTask(TaskType.dropCube, new double[] {0, 0}));
 				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {8, 7}));
 			} else {
-				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {17, 6}));
 				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
-				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
+				taskList.add(new AutoTask(TaskType.goTo, new double[] {17, 6}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {13}));
 				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
-				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {17, 10}));
+				taskList.add(new AutoTask(TaskType.goTo, new double[] {17, 10}));
 				taskList.add(new AutoTask(TaskType.dropCube, new double[] {0, 0}));
 				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {17, 7}));
 			}
@@ -625,7 +664,7 @@ public class GhostController implements HuskyClass {
 		
 		case "sw_out":
 			if (gameInfo.charAt(0) == 'L') {
-				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {5, 13}));
+				taskList.add(new AutoTask(TaskType.goTo, new double[] {x, 13}));
 				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
 				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
 				taskList.add(new AutoTask(TaskType.pointAt, new double[] {90}));
@@ -672,3 +711,6 @@ public class GhostController implements HuskyClass {
 	}
 	
 }
+
+
+

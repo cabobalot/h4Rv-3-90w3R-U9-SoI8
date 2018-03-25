@@ -2,6 +2,10 @@ package org.usfirst.frc.team4585.model;
 
 public class HuskyMath {
 	
+	public static double distance(double x0, double y0,double x1, double y1) {
+		return Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2));
+	}
+	
 	public static double gMod360(double in) {
 		double out = in;
 		if (in > 360) {
@@ -25,7 +29,6 @@ public class HuskyMath {
 		
 		return out;
 	}
-	
 	
 	public static double modAngDiff(double in, double targ) {
 		double angleDiff = (targ - in);

@@ -12,7 +12,7 @@ public class ArmExtender implements HuskyClass {
 	
 	private final double MAX_AMPS = 2;
 	private final double MAX_BEYOND = 13;
-	private final double MAX_MAX = 17;
+	private final double MAX_MAX = 18;
 	private final int POT_PORT = 1;
 	private final int ARMEXT_PORT = 6;
 	
@@ -130,7 +130,8 @@ public class ArmExtender implements HuskyClass {
 
 	@Override
 	public void doAuto() {
-		extender.set((pot.get() - distanceLimit(targPos)) / 5);
+		extender.set(HuskyMath.limitRange((pot.get() - distanceLimit(targPos)) / 4, -0.35, 0.35));
+		
 
 	}
 	

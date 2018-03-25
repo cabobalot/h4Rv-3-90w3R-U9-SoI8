@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends IterativeRobot {
 	
 	private final boolean DO_VISION = false;		//vision setting!!!!
+	private final boolean EXPOSURE = false;
 	
 	private final int DRIVE_PORT = 0;
 	private final int WEAPONS_PORT = 1;
@@ -32,8 +33,8 @@ public class Robot extends IterativeRobot {
 	private Timer timer = new Timer();
 	
 	private HuskyJoy driveJoy = new HuskyJoy(DRIVE_PORT);
-//	private HuskyJoy weaponsJoy = driveJoy;
-	private HuskyJoy weaponsJoy = new HuskyJoy(WEAPONS_PORT);
+	private HuskyJoy weaponsJoy = driveJoy;
+//	private HuskyJoy weaponsJoy = new HuskyJoy(WEAPONS_PORT);
 	
 	private Chassis chassis = new Chassis(driveJoy, timer);
 	private Arm arm = new Arm(weaponsJoy);
@@ -112,6 +113,10 @@ public class Robot extends IterativeRobot {
 		actuator.doAuto();
 		
 		arduino.setPins();
+		if (DO_VISION && EXPOSURE) {
+			visCom.updateExposure();
+		}
+		
 		SmartDashboard.putNumber("sonar", tracker.getInfo()[3]);
 		
 	}
@@ -153,6 +158,9 @@ public class Robot extends IterativeRobot {
 		lifters.doTeleop();
 		winch.doTeleop();
 		
+		if (DO_VISION && EXPOSURE) {
+			visCom.updateExposure();
+		}
 		SmartDashboard.putNumber("sonar", tracker.getInfo()[3]);
 		arduino.setPins();
 		/*
@@ -160,6 +168,8 @@ public class Robot extends IterativeRobot {
 			visCom.doStuff();
 			oldTime = timer.get();
 		}*/
+		
+		
 		
 	}
 
@@ -179,7 +189,7 @@ public class Robot extends IterativeRobot {
 	
 	@Override
 	public void disabledPeriodic() {
-		if (DO_VISION) {
+		if (DO_VISION && EXPOSURE) {
 			visCom.updateExposure();
 		}
 		SmartDashboard.putNumber("sonar", tracker.getInfo()[3]);

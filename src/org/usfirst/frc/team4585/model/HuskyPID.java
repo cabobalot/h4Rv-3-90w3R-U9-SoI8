@@ -11,6 +11,7 @@ public class HuskyPID {
 	private double oldError;
 	private double olderError;
 	private double oldOut;
+	private double errSum = 0;
 	
 	private Timer timer = new Timer();
 	
@@ -30,7 +31,10 @@ public class HuskyPID {
 		double dt = currTime - oldTime;
 		
 		double error = inVal - targVal;
-		double errSum = (error * dt) + (oldError * dt) + (olderError * dt); // assumes same dt values -- what?
+		
+//		double errSum = (error * dt) + (oldError * dt) + (olderError * dt); // assumes same dt values -- what?
+		errSum += error * dt;
+				
 		double errDer = (error - oldError) / dt;
 		
 		double buffer = 0;
@@ -54,17 +58,21 @@ public class HuskyPID {
 			buffer = -maxOut;
 		}
 		
-		SmartDashboard.putNumber("PID out", buffer);
+//		SmartDashboard.putNumber("PID out", buffer);
 		
 		oldOut = buffer;
 		return buffer;
+	}
+	
+	public void reset() {
+		errSum = 0;
 	}
 	
 	private double slewLimit(double in) {
 		double out = in;
 		
 		if (Math.abs(in - oldOut) > slewMax) {
-			out = oldOut + Math.copySign(slewMax, in);
+			out = oldOut + Math.copySign(slewMax, in - oldOut);
 			
 		}
 		

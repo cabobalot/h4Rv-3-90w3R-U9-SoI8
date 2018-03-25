@@ -11,7 +11,7 @@ public class Chassis extends DifferentialDrive implements HuskyClass {
 	private final static int RIGHT_DRIVE_PORT = 8;
 	private final static int LEFT_DRIVE_PORT = 9;
 	private final int SONAR_PORT = 0;
-	private final double TURN_GAIN = 0.7;
+	private final double TURN_GAIN = 0.8;
 	private final double DRIVE_GAIN = 1;
 	
 	private AnalogSonar sonar = new AnalogSonar(SONAR_PORT);
@@ -39,8 +39,9 @@ public class Chassis extends DifferentialDrive implements HuskyClass {
 	
 	@Override
 	public void doTeleop() {
-		arcadeDrive(info[0] * DRIVE_GAIN, info[1] * TURN_GAIN);
-		
+//		arcadeDrive(Math.copySign(Math.pow(info[0] * DRIVE_GAIN, 2), info[0] * DRIVE_GAIN), Math.copySign(Math.pow(info[0] * DRIVE_GAIN, 2), info[1] * DRIVE_GAIN));
+//		arcadeDrive(info[0] * DRIVE_GAIN, info[1] * DRIVE_GAIN);
+		arcadeDrive(info[0] * DRIVE_GAIN, info[1] * DRIVE_GAIN, true);
 		
 		SmartDashboard.putNumber("joystick axis two:", joy.getRawAxis(2));
 		SmartDashboard.putNumber("in: ", sonar.getInches());

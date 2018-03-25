@@ -86,7 +86,7 @@ public class Arm implements HuskyClass {
 		
 //		arm.set(armPid.calculate(pot.get(), HuskyMath.map(joy.getRawAxis(1), -1, 1, -10, 94)) / 90.0d);
 		
-		double joyVal = HuskyMath.limitRange(slewLimit(HuskyMath.map(joy.getRawAxis(3), 1, -1, -10, 94), oldJoy, 0.4), MIN_ANGLE, MAX_ANGLE);
+		double joyVal = HuskyMath.limitRange(slewLimit(HuskyMath.map(joy.getRawAxis(3), 1, -1, MIN_ANGLE, MAX_ANGLE), oldJoy, 0.8), MIN_ANGLE, MAX_ANGLE);
 		
 		double PIDout = armPid.calculate(pot.get(), joyVal) / 90.0d;
 		
@@ -108,7 +108,7 @@ public class Arm implements HuskyClass {
 			}
 		}
 		else {
-			arm.set(HuskyMath.limitRange(PIDout, -0.4, 0.1));
+			arm.set(HuskyMath.limitRange(PIDout, -0.5, 0.2));
 		}
 		
 		
