@@ -700,6 +700,7 @@ public class GhostController implements HuskyClass {
 	
 	private void addToAuto(String options, String gameInfo) {
 		double x = tracker.getInfo()[0];
+		double y = tracker.getInfo()[1];
 		switch (options) {
 		case "sw_in":
 			if (gameInfo.charAt(0) == 'L') {
@@ -724,19 +725,26 @@ public class GhostController implements HuskyClass {
 		
 		case "sw_out":
 			if (gameInfo.charAt(0) == 'L') {
+				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
 				taskList.add(new AutoTask(TaskType.goTo, new double[] {x, 13}));
-				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
-				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
-				taskList.add(new AutoTask(TaskType.pointAt, new double[] {90}));
-				taskList.add(new AutoTask(TaskType.dropCube, new double[] {90, 0}));
-				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {4, 13}));
+				if (x < 13) {
+					taskList.add(new AutoTask(TaskType.pointAt, new double[] {90}));
+					taskList.add(new AutoTask(TaskType.goTo, new double[] {x + 3, 13}));
+					taskList.add(new AutoTask(TaskType.dropCube, new double[] {90, 0}));
+//					taskList.add(new AutoTask(TaskType.goToReverse, new double[] {4, 13}));
+				}
 			} else {
-				taskList.add(new AutoTask(TaskType.goToMapping, new double[] {21, 13}));
 				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
 				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
-				taskList.add(new AutoTask(TaskType.pointAt, new double[] {-90}));
-				taskList.add(new AutoTask(TaskType.dropCube, new double[] {-90, 0}));
-				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {22, 13}));
+				taskList.add(new AutoTask(TaskType.goTo, new double[] {x, 13}));
+				if (x > 13) {
+					taskList.add(new AutoTask(TaskType.pointAt, new double[] {-90}));
+					taskList.add(new AutoTask(TaskType.goTo, new double[] {x - 3, 13}));
+					taskList.add(new AutoTask(TaskType.dropCube, new double[] {-90, 0}));
+//					taskList.add(new AutoTask(TaskType.goToReverse, new double[] {22, 13}));
+				}
+				
 			}
 			
 			break;
