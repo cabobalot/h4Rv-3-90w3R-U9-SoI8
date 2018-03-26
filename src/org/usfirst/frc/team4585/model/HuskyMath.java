@@ -6,6 +6,19 @@ public class HuskyMath {
 		return Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2));
 	}
 	
+	public static double roundHalf(double input) {
+		double out = Math.round(input * 10);
+		out = Math.round(out / 5);
+		out *= 5;
+		out /= 10;
+		
+		return out;
+	}
+	
+	public static boolean kindaEquals(double a, double b, double err) {
+		return (Math.abs(a - b) <= err + 0.000000001);		//floats are stupid, arbitrary amount of 0s
+	}
+	
 	public static double gMod360(double in) {
 		double out = in;
 		if (in > 360) {

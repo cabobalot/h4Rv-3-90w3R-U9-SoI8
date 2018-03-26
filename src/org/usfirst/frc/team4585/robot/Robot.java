@@ -199,6 +199,7 @@ public class Robot extends IterativeRobot {
 		
 		if (SmartDashboard.getBoolean("calibrate gyro", false)) {
 			tracker.calibrateGyro();
+			SmartDashboard.putBoolean("calibrate gyro", false);
 		}
 		
 		

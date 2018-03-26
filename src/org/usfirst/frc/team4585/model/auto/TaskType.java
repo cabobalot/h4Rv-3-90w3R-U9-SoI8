@@ -10,5 +10,7 @@ public enum TaskType {
 	stop,
 	goToMapping,
 	goToReverse,
-	setClaw
+	setClaw,
+	goToExact,
+	goToReverseExact
 }
