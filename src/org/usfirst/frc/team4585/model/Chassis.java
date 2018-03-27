@@ -17,6 +17,7 @@ public class Chassis extends DifferentialDrive implements HuskyClass {
 	private AnalogSonar sonar = new AnalogSonar(SONAR_PORT);
 	
 	private double[] info = {0, 0};
+	private double[] oldOut;
 	
 	
 	
@@ -34,17 +35,26 @@ public class Chassis extends DifferentialDrive implements HuskyClass {
 	
 	@Override
 	public void teleopInit() {
-		
+		oldOut = new double[] {0, 0};
 	}
 	
 	@Override
 	public void doTeleop() {
 //		arcadeDrive(Math.copySign(Math.pow(info[0] * DRIVE_GAIN, 2), info[0] * DRIVE_GAIN), Math.copySign(Math.pow(info[0] * DRIVE_GAIN, 2), info[1] * DRIVE_GAIN));
 //		arcadeDrive(info[0] * DRIVE_GAIN, info[1] * DRIVE_GAIN);
-		arcadeDrive(info[0] * DRIVE_GAIN, info[1] * DRIVE_GAIN, true);
+//		arcadeDrive(info[0] * DRIVE_GAIN, info[1] * DRIVE_GAIN, true);
 		
-		SmartDashboard.putNumber("joystick axis two:", joy.getRawAxis(2));
-		SmartDashboard.putNumber("in: ", sonar.getInches());
+		double driveSlew = SmartDashboard.getNumber("Drive slew", 1);
+		double turnSlew = SmartDashboard.getNumber("Turn slew", 1);
+		
+		double outDrive = slewLimit(info[0], oldOut[0], 0.03);
+		double outTurn = slewLimit(info[1], oldOut[1], 0.04);
+		arcadeDrive(outDrive, outTurn);
+		oldOut[0] = outDrive;
+		oldOut[1] = outTurn;
+		
+		SmartDashboard.putNumber("Drive slew", driveSlew);
+		SmartDashboard.putNumber("Turn Slew", turnSlew);
 	}
 	
 	@Override
@@ -59,6 +69,16 @@ public class Chassis extends DifferentialDrive implements HuskyClass {
 		
 		SmartDashboard.putNumber("joystick axis one:", joy.getRawAxis(1));
 		SmartDashboard.putNumber("in: ",sonar.getInches());
+	}
+	
+	private double slewLimit(double in, double old, double slewMax){
+		double out = in;
+		
+		if (Math.abs(in - old) > slewMax) {
+			out = old + Math.copySign(slewMax, in - old);
+		}
+		return out;
+		
 	}
 
 	@Override

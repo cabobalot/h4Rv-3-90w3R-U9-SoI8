@@ -39,6 +39,7 @@ public class GhostController implements HuskyClass {
 	
 	private double[] targPoint = {-1, -1};
 	private Iterator<Vertex> itr;
+	private double oldTime = -1;
 	
 	private Chassis chassis;
 	private Arm arm;
@@ -56,8 +57,9 @@ public class GhostController implements HuskyClass {
 	private VisionCom visCom = new VisionCom();
 	private Timer timer = new Timer();
 	private HuskyPathFinder pathFinder = new HuskyPathFinder("/h4Rv-3-P0w3R-U9/src/fieldMap.map");
-	private HuskyPID drivePID = new HuskyPID(2.0, 0.03, 0.8, 0.8, 0.03);
-//	private HuskyPID drivePID;
+//	private HuskyPID drivePID = new HuskyPID(2.0, 0.03, 0.8, 0.8, 0.03);
+	private HuskyPID drivePID = new HuskyPID(2.0, 0.03, 0.8, 0.8, 0.02);
+	
 //	/h4Rv-3-P0w3R-U9/src/fieldMap.map
 //	./src/fieldMap.map
 	
@@ -188,12 +190,15 @@ public class GhostController implements HuskyClass {
 		if (twoCubeChooser.getSelected()) {
 			
 			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {-10}));
-			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {12.5, 4}));
+			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {12.5, 5}));
+			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {12.5, 2}));
 			taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
 			taskList.add(new AutoTask(TaskType.setArmDist, new double[] {13}));
-			taskList.add(new AutoTask(TaskType.goToExact, new double[] {12.5, 6.5}));
+			taskList.add(new AutoTask(TaskType.goToExact, new double[] {13, 6.5}));
 			taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
+			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {-20}));
 			taskList.add(new AutoTask(TaskType.setClaw, new double[] {1}));
+			taskList.add(new AutoTask(TaskType.pause, new double[] {0.5}));
 			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
 			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {12.5, 4}));
 			
@@ -231,6 +236,7 @@ public class GhostController implements HuskyClass {
 		mapUpdate = 0;
 		oldTargX = 0;
 		oldTargY = 0;
+		oldTime = -1.0;
 		SmartDashboard.putNumber("mapUpdate", mapUpdate);
 		timer.reset();
 		timer.start();
@@ -369,7 +375,20 @@ public class GhostController implements HuskyClass {
 				chassis.giveInfo(new double[] {0, 0});
 				break;
 			
+			case pause:
+				chassis.giveInfo(new double[] {0, 0});
+				if (oldTime < 0) {
+					oldTime = timer.get();
+				}
+				if (timer.get() >= oldTime + taskList.get(counter).getInfo()[0]) {
+					oldTime = -1.0;
+					counter++;
+				}
+				
+				break;
+			
 			default:
+				chassis.giveInfo(new double[] {0, 0});
 				break;
 				
 			}
@@ -457,8 +476,8 @@ public class GhostController implements HuskyClass {
 					HuskyMath.kindaEquals(posInfo[1], HuskyMath.roundHalf(I[1]), 0.6);
 		}
 		else {
-			return (Math.round(posInfo[0]) == Math.round(I[0])) && 
-					(Math.round(posInfo[1]) == Math.round(I[1]));
+			return (HuskyMath.kindaEquals(posInfo[0], Math.round(I[0]), 0.7) && 
+					(HuskyMath.kindaEquals(posInfo[1], Math.round(I[1]), 0.7)));
 		}
 		
 	}
@@ -705,18 +724,18 @@ public class GhostController implements HuskyClass {
 		case "sw_in":
 			if (gameInfo.charAt(0) == 'L') {
 				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {8, 8}));
+				taskList.add(new AutoTask(TaskType.goTo, new double[] {10, 8}));
 				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
 				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {8, 10}));
+				taskList.add(new AutoTask(TaskType.goToExact, new double[] {10, 9.5}));
 				taskList.add(new AutoTask(TaskType.setClaw, new double[] {0}));
-				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {8, 7}));
+				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {10, 7}));
 			} else {
 				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
 				taskList.add(new AutoTask(TaskType.goTo, new double[] {17, 8}));
 				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
 				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {17, 10}));
+				taskList.add(new AutoTask(TaskType.goToExact, new double[] {17, 9.5}));
 				taskList.add(new AutoTask(TaskType.setClaw, new double[] {0}));
 				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {17, 7}));
 			}

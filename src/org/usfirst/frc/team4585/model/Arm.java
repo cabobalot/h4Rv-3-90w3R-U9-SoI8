@@ -139,7 +139,7 @@ public class Arm implements HuskyClass {
 		
 		
 		if (!fakeEstop) {
-			arm.set(HuskyMath.limitRange(armPid.calculate(currentAngle, targAngle) / 90.0d, -0.4, 0.1));
+			arm.set(HuskyMath.limitRange(armPid.calculate(currentAngle, targAngle) / 90.0d, -0.45, 0.1));
 		}
 		else {
 			arm.set(0);
