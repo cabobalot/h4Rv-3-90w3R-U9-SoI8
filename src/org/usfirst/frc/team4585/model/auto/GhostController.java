@@ -191,7 +191,7 @@ public class GhostController implements HuskyClass {
 			
 			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {-10}));
 			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {12.5, 5}));
-			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {12.5, 2}));
+			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {12.5, 4}));
 			taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
 			taskList.add(new AutoTask(TaskType.setArmDist, new double[] {13}));
 			taskList.add(new AutoTask(TaskType.goToExact, new double[] {13, 6.5}));
