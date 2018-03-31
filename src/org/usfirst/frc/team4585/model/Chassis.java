@@ -11,7 +11,7 @@ public class Chassis extends DifferentialDrive implements HuskyClass {
 	private final static int RIGHT_DRIVE_PORT = 8;
 	private final static int LEFT_DRIVE_PORT = 9;
 	private final int SONAR_PORT = 0;
-	private final double TURN_GAIN = 0.8;
+	private final double TURN_GAIN = 0.9;
 	private final double DRIVE_GAIN = 1;
 	
 	private AnalogSonar sonar = new AnalogSonar(SONAR_PORT);
@@ -46,10 +46,18 @@ public class Chassis extends DifferentialDrive implements HuskyClass {
 		
 		double driveSlew = SmartDashboard.getNumber("Drive slew", 1);
 		double turnSlew = SmartDashboard.getNumber("Turn slew", 1);
+	
+//		double outDrive = slewLimit(info[0], oldOut[0], 0.03);
+//		double outTurn = slewLimit(info[1], oldOut[1], 0.04);
 		
-		double outDrive = slewLimit(info[0], oldOut[0], 0.03);
-		double outTurn = slewLimit(info[1], oldOut[1], 0.04);
-		arcadeDrive(outDrive, outTurn);
+		double outDrive = info[0] * DRIVE_GAIN;
+		double outTurn = info[1] * TURN_GAIN;
+		
+		arcadeDrive(outDrive, outTurn, true);
+		
+		SmartDashboard.putNumber("Drive speed thingy", outDrive);
+		SmartDashboard.putNumber("Turn speed", outTurn);
+		
 		oldOut[0] = outDrive;
 		oldOut[1] = outTurn;
 		

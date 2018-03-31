@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Claw implements HuskyClass {
 	private final int CLAW_PORT = 5;
 	private final double MAX_AMPS = 3;
-	private final int MOVE_TIME = 2;
+	private final double MOVE_TIME = 0.5;
 	
 	private Spark claw = new Spark(CLAW_PORT);
 	private PowerDistributionPanel powReg = new PowerDistributionPanel();
@@ -41,10 +41,16 @@ public class Claw implements HuskyClass {
 		
 		if (joy.getRawButton(5) == true && joy.getRawButton(3) == false) {
 			open = false;
+			
+			timer.reset();
+			timer.start();
 		}
 		else if (joy.getRawButton(5) == false && joy.getRawButton(3) == true) {
 			claw.set(0.4);
 			open = true;
+			
+			timer.reset();
+			timer.stop();
 		}
 		else {
 			claw.set(0);

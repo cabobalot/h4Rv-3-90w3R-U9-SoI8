@@ -14,19 +14,19 @@ public final class Constants {
 	
 	
 	//competition robot
-	/*
+//	/*
 	
 	public static final double LEFT_DISTANCE_PER_PULSE = (617.0d / 6.0d) / 13976.0d;
 	public static final double RIGHT_DISTANCE_PER_PULSE = (617.0d / 6.0d) / 14032.0d;
-	public static final double ARM_POT_OFFSET = -1657;
-	public static final double EXTEND_POT_OFFSET = 17;
+	public static final double ARM_POT_OFFSET = -1169;
+	public static final double EXTEND_POT_OFFSET = 50;
 	
 	
 //	*/
 	
 	
 	//prototype robot
-//	/*
+	/*
 	
 	public static final double LEFT_DISTANCE_PER_PULSE = (617.0d / 6.0d) / 13976.0d;
 	public static final double RIGHT_DISTANCE_PER_PULSE = (617.0d / 6.0d) / 14032.0d;

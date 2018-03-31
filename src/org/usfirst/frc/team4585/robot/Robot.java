@@ -33,8 +33,8 @@ public class Robot extends IterativeRobot {
 	private Timer timer = new Timer();
 	
 	private HuskyJoy driveJoy = new HuskyJoy(DRIVE_PORT);
-	private HuskyJoy weaponsJoy = driveJoy;
-//	private HuskyJoy weaponsJoy = new HuskyJoy(WEAPONS_PORT);
+//	private HuskyJoy weaponsJoy = driveJoy;
+	private HuskyJoy weaponsJoy = new HuskyJoy(WEAPONS_PORT);
 	
 	private Chassis chassis = new Chassis(driveJoy, timer);
 	private Arm arm = new Arm(weaponsJoy);
@@ -49,7 +49,7 @@ public class Robot extends IterativeRobot {
 
 	private GhostController marcus = new GhostController(chassis, arm, claw, actuator, winch, tracker, driveJoy, weaponsJoy);
   
-	private ArduinoCom arduino = new ArduinoCom(claw);
+	private ArduinoCom arduino = new ArduinoCom(claw, timer);
 	private VisionCom visCom = new VisionCom();
 	
 	private double oldTime;
@@ -94,6 +94,8 @@ public class Robot extends IterativeRobot {
 		
 		marcus.autoInit();
 
+		arduino.setPins();
+		arduino.setTime(false);
 		
 		timer.reset();
 		timer.start();
@@ -113,6 +115,7 @@ public class Robot extends IterativeRobot {
 		actuator.doAuto();
 		
 		arduino.setPins();
+		
 		if (DO_VISION && EXPOSURE) {
 			visCom.updateExposure();
 		}
@@ -134,6 +137,8 @@ public class Robot extends IterativeRobot {
 		actuator.teleopInit();
 		lifters.teleopInit();
 		
+		arduino.setPins();
+		arduino.setTime(true);
 		
 		timer.reset();
 		timer.start();

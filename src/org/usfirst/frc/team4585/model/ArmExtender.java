@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class ArmExtender implements HuskyClass {
 	
 	private final double MAX_AMPS = 2;
-	private final double MAX_BEYOND = 13;
+	private final double MAX_BEYOND = 15;
 	private final double MAX_MAX = 18;
 	private final int POT_PORT = 1;
 	private final int ARMEXT_PORT = 6;
@@ -20,6 +20,7 @@ public class ArmExtender implements HuskyClass {
 	
 	private AnalogPotentiometer pot = new AnalogPotentiometer(POT_PORT, -20.0d * Math.PI * 1.5d, Constants.EXTEND_POT_OFFSET);
 	private PowerDistributionPanel powReg = new PowerDistributionPanel();
+	private boolean potOn = true;
 	
 	private double targPos;
 	private double winchPos;
@@ -36,9 +37,11 @@ public class ArmExtender implements HuskyClass {
 	
 	public ArmExtender(Joystick J) {
 		
+		SmartDashboard.putBoolean("Extend Pot On?", potOn);
+		
 		joy = J;
 	}
-
+	
 	@Override
 	public void teleopInit() {
 		targPos = pot.get();
@@ -124,13 +127,17 @@ public class ArmExtender implements HuskyClass {
 
 	@Override
 	public void autoInit() {
-		targPos = pot.get();
+		targPos = -1000000000;
+		potOn = SmartDashboard.getBoolean("Extend Pot On?", true);
 
 	}
 
 	@Override
 	public void doAuto() {
-		extender.set(HuskyMath.limitRange((pot.get() - distanceLimit(targPos)) / 4, -0.35, 0.35));
+		if (potOn) {
+			extender.set(HuskyMath.limitRange((pot.get() - distanceLimit(targPos)) / 4, -0.35, 0.35));
+		}
+		
 		
 
 	}

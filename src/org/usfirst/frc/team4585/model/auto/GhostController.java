@@ -58,7 +58,7 @@ public class GhostController implements HuskyClass {
 	private Timer timer = new Timer();
 	private HuskyPathFinder pathFinder = new HuskyPathFinder("/h4Rv-3-P0w3R-U9/src/fieldMap.map");
 //	private HuskyPID drivePID = new HuskyPID(2.0, 0.03, 0.8, 0.8, 0.03);
-	private HuskyPID drivePID = new HuskyPID(2.0, 0.03, 0.8, 0.8, 0.02);
+	private HuskyPID drivePID = new HuskyPID(2.0, 0.03, 0.8, 0.8, 0.03);
 	
 //	/h4Rv-3-P0w3R-U9/src/fieldMap.map
 //	./src/fieldMap.map
@@ -189,14 +189,15 @@ public class GhostController implements HuskyClass {
 		
 		if (twoCubeChooser.getSelected()) {
 			
-			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {-10}));
+			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {-5}));
 			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {12.5, 5}));
-			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {12.5, 4}));
+			taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
+			taskList.add(new AutoTask(TaskType.goToReverse, new double[] {12.5, 3}));
 			taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
 			taskList.add(new AutoTask(TaskType.setArmDist, new double[] {13}));
-			taskList.add(new AutoTask(TaskType.goToExact, new double[] {13, 6.5}));
+			taskList.add(new AutoTask(TaskType.goToExact, new double[] {12.5, 7}));
 			taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
-			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {-20}));
+			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {-15}));
 			taskList.add(new AutoTask(TaskType.setClaw, new double[] {1}));
 			taskList.add(new AutoTask(TaskType.pause, new double[] {0.5}));
 			taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
@@ -209,8 +210,8 @@ public class GhostController implements HuskyClass {
 		
 		/*		//debug
 		taskList.clear();
-		taskList.add(new AutoTask(TaskType.goTo, new double[] {13, 6.5}));
-		taskList.add(new AutoTask(TaskType.goToReverse, new double[] {13, 1.5}));
+		taskList.add(new AutoTask(TaskType.goToExact, new double[] {13, 3}));
+//		taskList.add(new AutoTask(TaskType.goToReverse, new double[] {13, 1.5}));
 		
 		
 		/*
@@ -294,9 +295,9 @@ public class GhostController implements HuskyClass {
 		
 		
 //		driveTo(new double[] {13, 6.5}, false);
-		//SmartDashboard.putBoolean("at targ?", pointAt(90));
+//		SmartDashboard.putBoolean("at targ?", pointAt(45));
 		
-//		/*
+//		/*				//main stuff
 		actuator.giveArmAngle(arm.getInfo()[0]);
 		
 		if(counter < taskList.size()) {
@@ -552,7 +553,7 @@ public class GhostController implements HuskyClass {
 		
 		chassis.giveInfo(buffer);
 		
-		return (posInfo[2] < targAngle + 5) && (posInfo[2] > targAngle - 5);
+		return (posInfo[2] < targAngle + 8) && (posInfo[2] > targAngle - 8);
 	}
 	
 	private boolean pointAtCube() {
@@ -695,11 +696,11 @@ public class GhostController implements HuskyClass {
 			output = -0.3;
 		}
 		
-		else */if (output < 0.5 && !(output < 0.1)) {
-			output = 0.5;
+		else */if (output < 0.6 && !(output < 0.1)) {
+			output = 0.6;
 		}
-		else if (output > -0.5 && !(output > -0.1)) {
-			output = -0.5;
+		else if (output > -0.6 && !(output > -0.1)) {
+			output = -0.6;
 		}
 		else if (Math.abs(output) < 0.1) {
 			output = 0;
@@ -712,7 +713,9 @@ public class GhostController implements HuskyClass {
 //			output = -0.7;
 //		}
 		
-		output = HuskyMath.limitRange(output, -0.6, 0.6);
+		output = HuskyMath.limitRange(output, -0.8, 0.8);
+		
+		SmartDashboard.putNumber("angle accel out", output);
 		
 		return output;
 	}
@@ -724,19 +727,23 @@ public class GhostController implements HuskyClass {
 		case "sw_in":
 			if (gameInfo.charAt(0) == 'L') {
 				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {10, 8}));
-				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
+				taskList.add(new AutoTask(TaskType.goTo, new double[] {8, 7}));
+//				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));//othger
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {15}));
 				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
-				taskList.add(new AutoTask(TaskType.goToExact, new double[] {10, 9.5}));
+				taskList.add(new AutoTask(TaskType.goToExact, new double[] {8, 9}));
 				taskList.add(new AutoTask(TaskType.setClaw, new double[] {0}));
-				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {10, 7}));
+				taskList.add(new AutoTask(TaskType.pause, new double[] {0.5}));
+				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {8, 7}));
 			} else {
 				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));
-				taskList.add(new AutoTask(TaskType.goTo, new double[] {17, 8}));
-				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {10}));
+				taskList.add(new AutoTask(TaskType.goTo, new double[] {17, 7}));
+//				taskList.add(new AutoTask(TaskType.setArmDeg, new double[] {45}));//othger
+				taskList.add(new AutoTask(TaskType.setArmDist, new double[] {15}));
 				taskList.add(new AutoTask(TaskType.pointAt, new double[] {0}));
-				taskList.add(new AutoTask(TaskType.goToExact, new double[] {17, 9.5}));
+				taskList.add(new AutoTask(TaskType.goToExact, new double[] {17, 9}));
 				taskList.add(new AutoTask(TaskType.setClaw, new double[] {0}));
+				taskList.add(new AutoTask(TaskType.pause, new double[] {0.5}));
 				taskList.add(new AutoTask(TaskType.goToReverse, new double[] {17, 7}));
 			}
 			
@@ -749,7 +756,7 @@ public class GhostController implements HuskyClass {
 				taskList.add(new AutoTask(TaskType.goTo, new double[] {x, 13}));
 				if (x < 13) {
 					taskList.add(new AutoTask(TaskType.pointAt, new double[] {90}));
-					taskList.add(new AutoTask(TaskType.goTo, new double[] {x + 3, 13}));
+					taskList.add(new AutoTask(TaskType.goTo, new double[] {x + 2, 13}));
 					taskList.add(new AutoTask(TaskType.dropCube, new double[] {90, 0}));
 //					taskList.add(new AutoTask(TaskType.goToReverse, new double[] {4, 13}));
 				}
@@ -759,7 +766,7 @@ public class GhostController implements HuskyClass {
 				taskList.add(new AutoTask(TaskType.goTo, new double[] {x, 13}));
 				if (x > 13) {
 					taskList.add(new AutoTask(TaskType.pointAt, new double[] {-90}));
-					taskList.add(new AutoTask(TaskType.goTo, new double[] {x - 3, 13}));
+					taskList.add(new AutoTask(TaskType.goTo, new double[] {x - 2, 13}));
 					taskList.add(new AutoTask(TaskType.dropCube, new double[] {-90, 0}));
 //					taskList.add(new AutoTask(TaskType.goToReverse, new double[] {22, 13}));
 				}
